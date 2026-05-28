@@ -46,10 +46,30 @@ export const AudioEngine: React.FC = () => {
         });
     };
 
+    const handleToggleMusic = () => {
+      if (audio.paused) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        audio.play().then(() => {
+          setIsPlaying(true);
+          setIsStorePlaying(true);
+          fadeIn();
+        });
+      } else {
+        fadeOut(() => {
+          setIsPlaying(false);
+          setIsStorePlaying(false);
+        });
+      }
+    };
+
     window.addEventListener("play-love-music", handleStartMusic);
+    window.addEventListener("toggle-love-music", handleToggleMusic);
 
     return () => {
       window.removeEventListener("play-love-music", handleStartMusic);
+      window.removeEventListener("toggle-love-music", handleToggleMusic);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
