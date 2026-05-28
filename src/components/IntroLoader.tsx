@@ -164,7 +164,7 @@ export const IntroLoader: React.FC<IntroLoaderProps> = ({ onEnter }) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                   onClick={handleEnterClick}
-                  className="group relative px-8 py-3.5 rounded-full glass-panel border border-pink-300/30 text-cream-100 hover:text-white text-sm font-semibold tracking-wider hover-trigger transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,183,197,0.1)] hover:shadow-[0_0_30px_rgba(255,183,197,0.35)] flex items-center gap-2 cursor-none"
+                  className="group relative px-8 py-3.5 rounded-full glass-panel border border-pink-300/30 text-cream-100 hover:text-white text-sm font-semibold tracking-wider hover-trigger transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,183,197,0.1)] hover:shadow-[0_0_30px_rgba(255,183,197,0.35)] flex items-center gap-2 "
                 >
                   {/* Subtle inner background glow */}
                   <div className="absolute inset-0 bg-gradient-to-r from-pink-400/10 via-purple-500/10 to-gold-400/10 opacity-0 group-hover:opacity-100 rounded-full transition-all duration-500" />

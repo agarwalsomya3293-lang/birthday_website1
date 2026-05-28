@@ -97,11 +97,10 @@ body {
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.25);
 }
 
-/* Custom Cursor Hide for desktop */
-@media (min-width: 1024px) {
-  body, a, button, select, input, [role="button"] {
-    cursor: none !important;
-  }
+/* Custom Cursor dynamic hide */
+body.custom-cursor-active,
+body.custom-cursor-active * {
+  cursor: none !important;
 }
 
 /* Background animated Aurora/Nebula Gradients */

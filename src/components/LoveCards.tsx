@@ -108,7 +108,7 @@ export const LoveCards: React.FC = () => {
                     boxShadow: "0 25px 50px rgba(255,183,197,0.1)" 
                   }}
                   transition={{ duration: 0.6, ease: [0.25, 0.8, 0.25, 1] }}
-                  className="w-full h-full relative cursor-none hover-trigger rounded-2xl transition-shadow select-none"
+                  className="w-full h-full relative hover-trigger rounded-2xl transition-shadow select-none"
                 >
                   
                   {/* FRONT FACE OF CARD */}

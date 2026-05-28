@@ -86,7 +86,7 @@ export const SecretLetter: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.8 }}
                 onClick={() => setIsOpen(true)}
                 whileHover={{ scale: 1.05 }}
-                className="relative w-80 sm:w-96 h-56 bg-cream-100 rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.6)] cursor-none hover-trigger flex items-center justify-center group border border-pink-300/20"
+                className="relative w-80 sm:w-96 h-56 bg-cream-100 rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover-trigger flex items-center justify-center group border border-pink-300/20"
               >
                 {/* Triangular top flap fold line */}
                 <div className="absolute top-0 inset-x-0 h-0 border-t-[110px] border-t-cream-100/90 border-x-[160px] sm:border-x-[192px] border-x-transparent z-20 origin-top transition-transform duration-700 group-hover:skew-x-1" />
@@ -133,7 +133,7 @@ export const SecretLetter: React.FC = () => {
               </span>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-full hover:bg-pink-300/20 text-space-purple/80 hover:text-space-purple transition-colors cursor-none hover-trigger"
+                className="p-1.5 rounded-full hover:bg-pink-300/20 text-space-purple/80 hover:text-space-purple transition-colors hover-trigger"
                 title="Seal letter"
               >
                 <X className="w-4 h-4" />

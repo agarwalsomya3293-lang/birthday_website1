@@ -29,9 +29,13 @@ export const CustomCursor: React.FC = () => {
   useEffect(() => {
     // Detect mobile
     const isMobile = window.matchMedia("(max-width: 1024px)").matches;
-    if (isMobile) return;
+    if (isMobile) {
+      document.body.classList.remove("custom-cursor-active");
+      return;
+    }
 
     setIsVisible(true);
+    document.body.classList.add("custom-cursor-active");
 
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current.x = e.clientX;
@@ -190,6 +194,7 @@ export const CustomCursor: React.FC = () => {
       window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("resize", resizeCanvas);
       cancelAnimationFrame(animationFrameId);
+      document.body.classList.remove("custom-cursor-active");
     };
   }, [isHovered]);
 
@@ -200,24 +205,24 @@ export const CustomCursor: React.FC = () => {
       {/* Particle Canvas */}
       <canvas
         ref={canvasRef}
-        className="fixed top-0 left-0 w-full h-full pointer-events-none z-[9999]"
+        className="fixed top-0 left-0 w-full h-full pointer-events-none z-[99999]"
       />
 
       {/* Main Outer Ring */}
       <div
         ref={ringRef}
-        className={`fixed top-0 left-0 w-8 h-8 rounded-full border border-pink-300 pointer-events-none -ml-4 -mt-4 transition-all duration-300 z-[9999] will-change-transform mix-blend-screen flex items-center justify-center ${
+        className={`fixed top-0 left-0 w-8 h-8 rounded-full border border-pink-300 pointer-events-none -ml-4 -mt-4 transition-all duration-300 z-[99999] will-change-transform mix-blend-screen flex items-center justify-center shadow-[0_0_10px_rgba(255,183,197,0.3)] ${
           isHovered
-            ? "bg-pink-300/10 border-pink-400 border-2 w-12 h-12 -ml-6 -mt-6"
+            ? "bg-pink-300/10 border-pink-400 border-2 w-12 h-12 -ml-6 -mt-6 shadow-[0_0_20px_rgba(255,183,197,0.5)]"
             : ""
-        } ${isClicked ? "scale-90 border-gold-400" : ""}`}
+        } ${isClicked ? "scale-90 border-gold-400 shadow-[0_0_20px_rgba(255,215,0,0.5)]" : ""}`}
       />
 
       {/* Central Solid Pointer Dot */}
       <div
         ref={dotRef}
-        className={`fixed top-0 left-0 w-1.5 h-1.5 rounded-full bg-pink-300 pointer-events-none -ml-[3px] -mt-[3px] z-[9999] will-change-transform ${
-          isHovered ? "bg-gold-400 scale-[2]" : ""
+        className={`fixed top-0 left-0 w-1.5 h-1.5 rounded-full bg-pink-300 pointer-events-none -ml-[3px] -mt-[3px] z-[99999] will-change-transform shadow-[0_0_8px_rgba(255,183,197,0.9)] ${
+          isHovered ? "bg-gold-400 scale-[2.5] shadow-[0_0_12px_rgba(255,215,0,0.9)]" : ""
         }`}
       />
     </>

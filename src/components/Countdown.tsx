@@ -183,7 +183,7 @@ export const Countdown: React.FC = () => {
           
           <button
             onClick={handleMakeWish}
-            className="group relative px-10 py-5 rounded-full bg-gradient-to-r from-pink-400 via-purple-600 to-gold-400 text-cream-100 font-bold tracking-wider hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_15px_40px_rgba(255,183,197,0.3)] hover:shadow-[0_20px_50px_rgba(255,183,197,0.5)] z-10 cursor-none hover-trigger flex items-center gap-2 border border-white/20 uppercase text-xs sm:text-sm"
+            className="group relative px-10 py-5 rounded-full bg-gradient-to-r from-pink-400 via-purple-600 to-gold-400 text-cream-100 font-bold tracking-wider hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_15px_40px_rgba(255,183,197,0.3)] hover:shadow-[0_20px_50px_rgba(255,183,197,0.5)] z-10 hover-trigger flex items-center gap-2 border border-white/20 uppercase text-xs sm:text-sm"
           >
             {/* Sliding backdrop light */}
             <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -222,7 +222,7 @@ export const Countdown: React.FC = () => {
               {/* Close top button */}
               <button
                 onClick={() => setShowWishModal(false)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/5 text-cream-100/60 hover:text-cream-100 transition-colors cursor-none hover-trigger"
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/5 text-cream-100/60 hover:text-cream-100 transition-colors hover-trigger"
               >
                 <XIcon className="w-4 h-4" />
               </button>
@@ -245,7 +245,7 @@ export const Countdown: React.FC = () => {
               {/* Close Button */}
               <button
                 onClick={() => setShowWishModal(false)}
-                className="px-6 py-2.5 rounded-full border border-pink-300/30 hover:border-pink-300/60 font-sans text-[10px] font-bold uppercase tracking-widest text-pink-300 transition-all hover:bg-pink-300/10 cursor-none hover-trigger"
+                className="px-6 py-2.5 rounded-full border border-pink-300/30 hover:border-pink-300/60 font-sans text-[10px] font-bold uppercase tracking-widest text-pink-300 transition-all hover:bg-pink-300/10 hover-trigger"
               >
                 Return to universe
               </button>

@@ -246,7 +246,7 @@ export const MemorySky: React.FC = () => {
                   onMouseEnter={() => setHoveredStar(star)}
                   onMouseLeave={() => setHoveredStar(null)}
                   onClick={() => setSelectedStar(star)}
-                  className="relative p-3 rounded-full hover:scale-125 transition-transform duration-300 focus:outline-none cursor-none hover-trigger"
+                  className="relative p-3 rounded-full hover:scale-125 transition-transform duration-300 focus:outline-none hover-trigger"
                 >
                   {/* Glowing halo indicator */}
                   <motion.div
@@ -318,7 +318,7 @@ export const MemorySky: React.FC = () => {
                     </h3>
                     <button
                       onClick={() => setSelectedStar(null)}
-                      className="p-1 rounded hover:bg-white/5 text-cream-100/60 hover:text-cream-100 transition-colors cursor-none hover-trigger"
+                      className="p-1 rounded hover:bg-white/5 text-cream-100/60 hover:text-cream-100 transition-colors hover-trigger"
                     >
                       <X className="w-4 h-4" />
                     </button>

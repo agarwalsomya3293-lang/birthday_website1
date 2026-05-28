@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { BIRTHDAY_CONFIG } from "../data/memories";
+import { useAudioStore } from "../store";
 
 export const AudioEngine: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -8,18 +9,36 @@ export const AudioEngine: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
 
+  const setAnalyser = useAudioStore((state) => state.setAnalyser);
+  const setIsStorePlaying = useAudioStore((state) => state.setIsPlaying);
+
   useEffect(() => {
     // Initialize audio element
     const audio = new Audio(BIRTHDAY_CONFIG.musicUrl);
     audio.loop = true;
     audio.volume = 0; // Start at 0 for fade-in
+    audio.crossOrigin = "anonymous";
     audioRef.current = audio;
+
+    // Web Audio API setup for visualizer
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    const source = audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    
+    setAnalyser(analyser);
 
     // Listen to custom event to start audio from Intro Loader
     const handleStartMusic = () => {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       audio.play()
         .then(() => {
           setIsPlaying(true);
+          setIsStorePlaying(true);
           fadeIn();
         })
         .catch((err) => {
@@ -38,6 +57,7 @@ export const AudioEngine: React.FC = () => {
       if (fadeIntervalRef.current) {
         clearInterval(fadeIntervalRef.current);
       }
+      audioCtx.close();
     };
   }, []);
 
@@ -86,10 +106,17 @@ export const AudioEngine: React.FC = () => {
     if (isPlaying) {
       fadeOut(() => {
         setIsPlaying(false);
+        setIsStorePlaying(false);
       });
     } else {
+      // Must resume audio context if suspended
+      const state = useAudioStore.getState();
+      if (state.analyser) {
+        (state.analyser.context as AudioContext).resume();
+      }
       audioRef.current.play().then(() => {
         setIsPlaying(true);
+        setIsStorePlaying(true);
         fadeIn();
       });
     }
@@ -109,7 +136,7 @@ export const AudioEngine: React.FC = () => {
       {/* Visualizer and main toggle */}
       <button
         onClick={togglePlay}
-        className="group relative flex items-center justify-center w-14 h-14 rounded-full glass-panel border border-pink-300/30 hover:border-pink-300/60 shadow-lg text-cream-100 backdrop-blur-md cursor-none overflow-hidden transition-all duration-300 hover:scale-105"
+        className="group relative flex items-center justify-center w-14 h-14 rounded-full glass-panel border border-pink-300/30 hover:border-pink-300/60 shadow-lg text-cream-100 backdrop-blur-md overflow-hidden transition-all duration-300 hover:scale-105"
       >
         {/* Glow backdrop effect */}
         <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/30 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -130,7 +157,7 @@ export const AudioEngine: React.FC = () => {
       {isPlaying && (
         <button
           onClick={toggleMute}
-          className="p-2.5 rounded-full glass-panel border border-pink-300/10 text-pink-300/80 hover:text-pink-300 hover:scale-105 transition-all cursor-none"
+          className="p-2.5 rounded-full glass-panel border border-pink-300/10 text-pink-300/80 hover:text-pink-300 hover:scale-105 transition-all "
           title={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
