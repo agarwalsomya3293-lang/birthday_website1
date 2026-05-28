@@ -1,94 +1,179 @@
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useScroll, Stars, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useAudioStore } from "../store";
 import { BIRTHDAY_CONFIG } from "../data/memories";
 
+/* ──────────────────────────────────────────────
+   Glowing Orb – a simple emissive sphere with
+   a soft halo, used for constellation nodes
+   ────────────────────────────────────────────── */
+const GlowOrb: React.FC<{
+  position: [number, number, number];
+  color: string;
+  emissive: string;
+  size?: number;
+}> = ({ position, color, emissive, size = 0.2 }) => (
+  <Float speed={1.5} rotationIntensity={0.3} floatIntensity={1}>
+    <mesh position={position}>
+      <sphereGeometry args={[size, 24, 24]} />
+      <meshStandardMaterial
+        color={color}
+        emissive={emissive}
+        emissiveIntensity={3}
+        toneMapped={false}
+      />
+    </mesh>
+    {/* Soft halo */}
+    <mesh position={position}>
+      <sphereGeometry args={[size * 3, 16, 16]} />
+      <meshBasicMaterial
+        color={emissive}
+        transparent
+        opacity={0.04}
+        depthWrite={false}
+      />
+    </mesh>
+  </Float>
+);
+
+/* ──────────────────────────────────────────────
+   MAIN 3D SCENE
+   ────────────────────────────────────────────── */
 export const Scene3D: React.FC = () => {
   const scroll = useScroll();
-  const groupRef = useRef<THREE.Group>(null);
-  const cameraGroupRef = useRef<THREE.Group>(null);
-  const getAudioIntensity = useAudioStore(state => state.getAudioIntensity);
+  const worldRef = useRef<THREE.Group>(null);
+  const cameraRigRef = useRef<THREE.Group>(null);
+  const getAudioIntensity = useAudioStore((s) => s.getAudioIntensity);
+
+  // Pre-compute stable random positions
+  const photoPositions = useMemo(() =>
+    BIRTHDAY_CONFIG.memoriesPhotos.map((_, i) => {
+      const angle = (i / BIRTHDAY_CONFIG.memoriesPhotos.length) * Math.PI * 2;
+      const radius = 6 + (i % 3) * 2;
+      return [
+        Math.cos(angle) * radius,
+        (Math.random() - 0.5) * 4,
+        -(15 + i * 5), // Spread deeper into the scene, AWAY from hero
+      ] as [number, number, number];
+    }),
+  []);
+
+  const timelinePositions = useMemo(() =>
+    BIRTHDAY_CONFIG.timelineEvents.map((_, i) => [
+      (i % 2 === 0 ? 1 : -1) * (5 + (i % 3)),
+      (Math.random() - 0.5) * 3,
+      -(50 + i * 6),
+    ] as [number, number, number]),
+  []);
+
+  // Ambient orbs scattered decoratively
+  const ambientOrbs = useMemo(() =>
+    Array.from({ length: 25 }, (_, i) => ({
+      position: [
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 15,
+        -Math.random() * 80,
+      ] as [number, number, number],
+      color: ["#FFB7C5", "#8B5CF6", "#FFD700"][i % 3],
+      emissive: ["#FFB7C5", "#a78bfa", "#FFD700"][i % 3],
+      size: 0.08 + Math.random() * 0.15,
+    })),
+  []);
 
   useFrame(() => {
-    // Scroll progress is between 0 and 1
     const offset = scroll.offset;
 
-    // Cinematic Camera Motion
-    // As user scrolls, camera flies forward through Z space
-    if (cameraGroupRef.current) {
-      // Pushing camera forward in Z space based on scroll
-      // The total scroll length represents a journey of say, 50 units
-      cameraGroupRef.current.position.z = THREE.MathUtils.lerp(
-        cameraGroupRef.current.position.z,
-        -offset * 40,
-        0.05
+    if (cameraRigRef.current) {
+      // Smooth camera Z push – the entire journey depth
+      cameraRigRef.current.position.z = THREE.MathUtils.lerp(
+        cameraRigRef.current.position.z,
+        -offset * 50,
+        0.04
       );
 
-      // Subtle rotation for cinematic pan effect
-      cameraGroupRef.current.rotation.y = THREE.MathUtils.lerp(
-        cameraGroupRef.current.rotation.y,
-        Math.sin(offset * Math.PI * 4) * 0.1,
-        0.05
+      // Very gentle cinematic sway
+      cameraRigRef.current.rotation.y = THREE.MathUtils.lerp(
+        cameraRigRef.current.rotation.y,
+        Math.sin(offset * Math.PI * 3) * 0.06,
+        0.03
+      );
+      cameraRigRef.current.rotation.x = THREE.MathUtils.lerp(
+        cameraRigRef.current.rotation.x,
+        Math.cos(offset * Math.PI * 2) * 0.02,
+        0.03
       );
     }
 
-    // Audio Reactivity
+    // Audio reactivity – subtle world pulse
     const intensity = getAudioIntensity();
-    if (groupRef.current) {
-      // Pulse scale slightly with bass/music
-      const targetScale = 1 + intensity * 0.2;
-      groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+    if (worldRef.current) {
+      const s = 1 + intensity * 0.12;
+      worldRef.current.scale.lerp(new THREE.Vector3(s, s, s), 0.08);
     }
   });
 
   return (
-    <group ref={cameraGroupRef}>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} color="#FFB7C5" />
-      <directionalLight position={[-10, -10, -5]} intensity={0.5} color="#1E1035" />
+    <group ref={cameraRigRef}>
+      {/* Lighting */}
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[8, 6, 5]} intensity={0.8} color="#FFB7C5" />
+      <directionalLight position={[-8, -4, -5]} intensity={0.3} color="#1E1035" />
+      <pointLight position={[0, 0, 0]} intensity={0.5} color="#8B5CF6" distance={20} />
 
-      <group ref={groupRef}>
-        {/* Galaxy Environment */}
-        <Stars 
-          radius={100} 
-          depth={150} 
-          count={5000} 
-          factor={5} 
-          saturation={0.8} 
-          fade 
-          speed={1.5} 
+      <group ref={worldRef}>
+        {/* ─── Galaxy Star Field ─── */}
+        <Stars
+          radius={120}
+          depth={200}
+          count={4000}
+          factor={4}
+          saturation={0.6}
+          fade
+          speed={0.8}
         />
-        
-        {/* Memory floating nodes (Polaroids in 3D space) */}
+
+        {/* ─── Ambient Decorative Orbs ─── */}
+        {ambientOrbs.map((orb, i) => (
+          <GlowOrb key={`orb-${i}`} {...orb} />
+        ))}
+
+        {/* ─── Floating Memory Polaroids ─── */}
+        {/* These are placed DEEP into the scene (Z: -15 to -45)
+            so they do NOT clutter the hero. The camera flies
+            past them as the user scrolls through sections 1-2. */}
         {BIRTHDAY_CONFIG.memoriesPhotos.map((photo, i) => (
-          <Float 
-            key={`photo-${i}`} 
-            speed={1 + Math.random()} 
-            rotationIntensity={0.5} 
-            floatIntensity={1.5} 
-            position={[
-              (Math.random() - 0.5) * 15,
-              (Math.random() - 0.5) * 10,
-              // Distribute photos along the Z-axis of the scroll journey (-10 to -35)
-              -(10 + Math.random() * 25) 
-            ]}
+          <Float
+            key={`photo-${i}`}
+            speed={0.8 + (i % 3) * 0.3}
+            rotationIntensity={0.3}
+            floatIntensity={1}
+            position={photoPositions[i]}
           >
-            <Html transform distanceFactor={5} sprite={false} zIndexRange={[100, 0]}>
-              <div 
-                className="polaroid-frame bg-cream-100 shadow-2xl hover-trigger select-none"
-                style={{ width: "240px", padding: "12px 12px 30px 12px", pointerEvents: "auto" }}
+            <Html
+              transform
+              distanceFactor={6}
+              sprite={false}
+              zIndexRange={[100, 0]}
+            >
+              <div
+                className="polaroid-frame bg-cream-100 shadow-2xl hover-trigger select-none transition-transform duration-500 hover:scale-105"
+                style={{ width: "220px", padding: "10px 10px 28px 10px", pointerEvents: "auto" }}
                 data-cursor="VIEW"
-                onClick={() => console.log('Opened full screen memory', photo.id)}
               >
                 <div className="polaroid-img-container" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
-                  <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+                  <img
+                    src={photo.url}
+                    alt={photo.caption}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                    loading="lazy"
+                  />
                 </div>
-                <p className="font-handwritten text-xl font-bold mt-4 leading-tight text-space-purple text-center">
+                <p className="font-handwritten text-lg font-bold mt-3 leading-tight text-space-purple text-center">
                   {photo.caption}
                 </p>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-pink-400 mt-2 text-center">
+                <p className="font-sans text-[9px] uppercase tracking-widest text-pink-400 mt-1.5 text-center">
                   {photo.date}
                 </p>
               </div>
@@ -96,39 +181,51 @@ export const Scene3D: React.FC = () => {
           </Float>
         ))}
 
-        {/* Constellation Timeline Nodes */}
+        {/* ─── Constellation Timeline Nodes ─── */}
+        {/* Placed even deeper (Z: -50 to -80) along the journey */}
         {BIRTHDAY_CONFIG.timelineEvents.map((event, i) => (
           <Float
             key={`timeline-${i}`}
-            speed={2}
-            rotationIntensity={2}
-            floatIntensity={2}
-            position={[
-              (i % 2 === 0 ? 1 : -1) * (4 + Math.random() * 4), // alternate left/right
-              (Math.random() - 0.5) * 6,
-              // Distribute further down Z axis (-40 to -70)
-              -(40 + i * 5)
-            ]}
+            speed={1.2}
+            rotationIntensity={0.5}
+            floatIntensity={1.5}
+            position={timelinePositions[i]}
           >
-            {/* The glowing planet/star */}
+            {/* Glowing planet */}
             <mesh>
-              <sphereGeometry args={[0.3, 32, 32]} />
-              <meshStandardMaterial 
-                color="#8B5CF6" 
-                emissive="#a78bfa" 
-                emissiveIntensity={2} 
-                toneMapped={false} 
+              <sphereGeometry args={[0.35, 32, 32]} />
+              <meshStandardMaterial
+                color="#8B5CF6"
+                emissive="#a78bfa"
+                emissiveIntensity={2.5}
+                toneMapped={false}
               />
             </mesh>
-            
-            <Html transform distanceFactor={8} position={[0, -1, 0]}>
-              <div 
-                className="text-center pointer-events-auto hover-trigger p-4 bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-xl w-64 shadow-[0_0_30px_rgba(167,139,250,0.2)] hover:shadow-[0_0_50px_rgba(167,139,250,0.6)] transition-all cursor-pointer"
+            {/* Planet halo */}
+            <mesh>
+              <sphereGeometry args={[0.8, 16, 16]} />
+              <meshBasicMaterial
+                color="#a78bfa"
+                transparent
+                opacity={0.03}
+                depthWrite={false}
+              />
+            </mesh>
+
+            <Html transform distanceFactor={8} position={[0, -1.2, 0]}>
+              <div
+                className="text-center pointer-events-auto hover-trigger p-5 bg-black/50 backdrop-blur-lg border border-purple-500/20 rounded-2xl w-72 shadow-[0_0_40px_rgba(167,139,250,0.15)] hover:shadow-[0_0_60px_rgba(167,139,250,0.4)] transition-all duration-500"
                 data-cursor="OPEN"
               >
-                <span className="text-pink-300 text-xs font-bold tracking-widest uppercase">{event.date}</span>
-                <h3 className="text-xl font-serif text-white font-bold mt-1 mb-2">{event.title}</h3>
-                <p className="text-sm text-cream-100/80">{event.description}</p>
+                <span className="text-pink-300/80 text-[10px] font-bold tracking-[0.3em] uppercase">
+                  {event.date}
+                </span>
+                <h3 className="text-xl font-serif text-white font-bold mt-2 mb-2">
+                  {event.title}
+                </h3>
+                <p className="text-sm text-cream-100/60 leading-relaxed">
+                  {event.description}
+                </p>
               </div>
             </Html>
           </Float>

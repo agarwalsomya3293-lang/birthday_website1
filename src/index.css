@@ -141,6 +141,18 @@ body.custom-cursor-active * {
   animation: heart-pulse 2s infinite ease-in-out;
 }
 
+/* Shimmer gradient slide for text */
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* Breathing aurora blob */
+@keyframes aurora-breathe {
+  0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.15; }
+  50% { transform: scale(1.15) translate(10px, -8px); opacity: 0.25; }
+}
+
 /* Polaroid Styling */
 .polaroid-frame {
   background-color: #FAF7F2;
