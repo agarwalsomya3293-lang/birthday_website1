@@ -47,6 +47,10 @@ export const Scene3D: React.FC = () => {
   const cameraRigRef = useRef<THREE.Group>(null);
   const getAudioIntensity = useAudioStore((s) => s.getAudioIntensity);
 
+  // HTML element refs to control opacity dynamically
+  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const timelineRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   // Pre-compute stable random positions
   const photoPositions = useMemo(() =>
     BIRTHDAY_CONFIG.memoriesPhotos.map((_, i) => {
@@ -112,6 +116,27 @@ export const Scene3D: React.FC = () => {
       const s = 1 + intensity * 0.12;
       worldRef.current.scale.lerp(new THREE.Vector3(s, s, s), 0.08);
     }
+
+    // Calculate opacities
+    const photoOpacity = offset < 0.08 ? 0 : Math.min(1, (offset - 0.08) * 10);
+    const timelineOpacity = offset < 0.22 ? 0 : Math.min(1, (offset - 0.22) * 10);
+
+    // Update DOM opacities directly (prevents heavy React re-renders)
+    photoRefs.current.forEach((ref) => {
+      if (ref) {
+        ref.style.opacity = photoOpacity.toString();
+        ref.style.pointerEvents = photoOpacity > 0.1 ? "auto" : "none";
+        ref.style.display = photoOpacity === 0 ? "none" : "block";
+      }
+    });
+
+    timelineRefs.current.forEach((ref) => {
+      if (ref) {
+        ref.style.opacity = timelineOpacity.toString();
+        ref.style.pointerEvents = timelineOpacity > 0.1 ? "auto" : "none";
+        ref.style.display = timelineOpacity === 0 ? "none" : "block";
+      }
+    });
   });
 
   return (
@@ -140,9 +165,6 @@ export const Scene3D: React.FC = () => {
         ))}
 
         {/* ─── Floating Memory Polaroids ─── */}
-        {/* These are placed DEEP into the scene (Z: -15 to -45)
-            so they do NOT clutter the hero. The camera flies
-            past them as the user scrolls through sections 1-2. */}
         {BIRTHDAY_CONFIG.memoriesPhotos.map((photo, i) => (
           <Float
             key={`photo-${i}`}
@@ -158,8 +180,9 @@ export const Scene3D: React.FC = () => {
               zIndexRange={[100, 0]}
             >
               <div
+                ref={(el) => { photoRefs.current[i] = el; }}
                 className="polaroid-frame bg-cream-100 shadow-2xl hover-trigger select-none transition-transform duration-500 hover:scale-105"
-                style={{ width: "220px", padding: "10px 10px 28px 10px", pointerEvents: "auto" }}
+                style={{ width: "220px", padding: "10px 10px 28px 10px", pointerEvents: "auto", display: "none", opacity: 0 }}
                 data-cursor="VIEW"
               >
                 <div className="polaroid-img-container" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
@@ -182,7 +205,6 @@ export const Scene3D: React.FC = () => {
         ))}
 
         {/* ─── Constellation Timeline Nodes ─── */}
-        {/* Placed even deeper (Z: -50 to -80) along the journey */}
         {BIRTHDAY_CONFIG.timelineEvents.map((event, i) => (
           <Float
             key={`timeline-${i}`}
@@ -214,7 +236,9 @@ export const Scene3D: React.FC = () => {
 
             <Html transform distanceFactor={8} position={[0, -1.2, 0]}>
               <div
+                ref={(el) => { timelineRefs.current[i] = el; }}
                 className="text-center pointer-events-auto hover-trigger p-5 bg-black/50 backdrop-blur-lg border border-purple-500/20 rounded-2xl w-72 shadow-[0_0_40px_rgba(167,139,250,0.15)] hover:shadow-[0_0_60px_rgba(167,139,250,0.4)] transition-all duration-500"
+                style={{ display: "none", opacity: 0 }}
                 data-cursor="OPEN"
               >
                 <span className="text-pink-300/80 text-[10px] font-bold tracking-[0.3em] uppercase">
