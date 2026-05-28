@@ -18,7 +18,7 @@ export const CustomCursor: React.FC = () => {
   const ringRef = useRef<HTMLDivElement | null>(null);
   const dotRef = useRef<HTMLDivElement | null>(null);
   
-  const [isHovered, setIsHovered] = useState(false);
+  const [hoverState, setHoverState] = useState<string | null>(null);
   const [isClicked, setIsClicked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   
@@ -59,20 +59,24 @@ export const CustomCursor: React.FC = () => {
       setIsClicked(false);
     };
 
-    // Detect hoverable items
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (
+      const closestCursorEl = target.closest("[data-cursor]");
+      
+      if (closestCursorEl) {
+        setHoverState(closestCursorEl.getAttribute("data-cursor"));
+      } else if (
         target.tagName === "A" ||
         target.tagName === "BUTTON" ||
         target.closest("button") ||
         target.closest("a") ||
         target.getAttribute("role") === "button" ||
-        target.classList.contains("hover-trigger")
+        target.classList.contains("hover-trigger") ||
+        target.closest(".hover-trigger")
       ) {
-        setIsHovered(true);
+        setHoverState("hover");
       } else {
-        setIsHovered(false);
+        setHoverState(null);
       }
     };
 
@@ -129,7 +133,7 @@ export const CustomCursor: React.FC = () => {
       ringPos.current.y += (mousePos.current.y - ringPos.current.y) * ringSpeed;
 
       if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ringPos.current.x}px, ${ringPos.current.y}px, 0px) scale(${isHovered ? 1.5 : 1})`;
+        ringRef.current.style.transform = `translate3d(${ringPos.current.x}px, ${ringPos.current.y}px, 0px) scale(${hoverState ? 1.5 : 1})`;
       }
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${mousePos.current.x}px, ${mousePos.current.y}px, 0px)`;
@@ -196,7 +200,7 @@ export const CustomCursor: React.FC = () => {
       cancelAnimationFrame(animationFrameId);
       document.body.classList.remove("custom-cursor-active");
     };
-  }, [isHovered]);
+  }, [hoverState]);
 
   if (!isVisible) return null;
 
@@ -212,17 +216,21 @@ export const CustomCursor: React.FC = () => {
       <div
         ref={ringRef}
         className={`fixed top-0 left-0 w-8 h-8 rounded-full border border-pink-300 pointer-events-none -ml-4 -mt-4 transition-all duration-300 z-[99999] will-change-transform mix-blend-screen flex items-center justify-center shadow-[0_0_10px_rgba(255,183,197,0.3)] ${
-          isHovered
+          hoverState
             ? "bg-pink-300/10 border-pink-400 border-2 w-12 h-12 -ml-6 -mt-6 shadow-[0_0_20px_rgba(255,183,197,0.5)]"
             : ""
         } ${isClicked ? "scale-90 border-gold-400 shadow-[0_0_20px_rgba(255,215,0,0.5)]" : ""}`}
-      />
+      >
+        {hoverState && hoverState !== "hover" && (
+          <span className="text-[8px] font-sans font-bold text-pink-300 tracking-widest">{hoverState}</span>
+        )}
+      </div>
 
       {/* Central Solid Pointer Dot */}
       <div
         ref={dotRef}
         className={`fixed top-0 left-0 w-1.5 h-1.5 rounded-full bg-pink-300 pointer-events-none -ml-[3px] -mt-[3px] z-[99999] will-change-transform shadow-[0_0_8px_rgba(255,183,197,0.9)] ${
-          isHovered ? "bg-gold-400 scale-[2.5] shadow-[0_0_12px_rgba(255,215,0,0.9)]" : ""
+          hoverState ? (hoverState !== "hover" ? "opacity-0" : "bg-gold-400 scale-[2.5] shadow-[0_0_12px_rgba(255,215,0,0.9)]") : ""
         }`}
       />
     </>

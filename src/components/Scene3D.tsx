@@ -79,6 +79,7 @@ export const Scene3D: React.FC = () => {
               <div 
                 className="polaroid-frame bg-cream-100 shadow-2xl hover-trigger select-none"
                 style={{ width: "240px", padding: "12px 12px 30px 12px", pointerEvents: "auto" }}
+                data-cursor="VIEW"
                 onClick={() => console.log('Opened full screen memory', photo.id)}
               >
                 <div className="polaroid-img-container" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
@@ -121,7 +122,10 @@ export const Scene3D: React.FC = () => {
             </mesh>
             
             <Html transform distanceFactor={8} position={[0, -1, 0]}>
-              <div className="text-center pointer-events-auto hover-trigger p-4 bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-xl w-64 shadow-[0_0_30px_rgba(167,139,250,0.2)] hover:shadow-[0_0_50px_rgba(167,139,250,0.6)] transition-all cursor-pointer">
+              <div 
+                className="text-center pointer-events-auto hover-trigger p-4 bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-xl w-64 shadow-[0_0_30px_rgba(167,139,250,0.2)] hover:shadow-[0_0_50px_rgba(167,139,250,0.6)] transition-all cursor-pointer"
+                data-cursor="OPEN"
+              >
                 <span className="text-pink-300 text-xs font-bold tracking-widest uppercase">{event.date}</span>
                 <h3 className="text-xl font-serif text-white font-bold mt-1 mb-2">{event.title}</h3>
                 <p className="text-sm text-cream-100/80">{event.description}</p>

@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Heart } from "lucide-react";
-import { useAppStore } from "../store";
-import { BIRTHDAY_CONFIG } from "../data/memories";
 
 export const InteractiveGifts: React.FC = () => {
   const [openedGifts, setOpenedGifts] = useState<number[]>([]);
